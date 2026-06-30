@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://python.org) [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE) [![OWASP](https://img.shields.io/badge/OWASP-MCP%20Top%2010-red)](https://owasp.org/www-project-mcp-top-10/)
 
-**`pip install mcp-lint && mcp-lint scan`** — 5 seconds. 10 OWASP checks. Zero API keys.
+**`pip install mcp-lint && mcp-lint scan`** — 5 秒 / 10 项检查 / 零 API 依赖。小小插件，为你的电脑保驾护航。
 
 ---
 
@@ -144,7 +144,7 @@ mcp-lint scan
 - 单个 AI 代理连接 5 个 MCP 服务器时，**攻击成功率 78.3%**（Unit 42, 2026）
 - OWASP 为此专门发布了 **MCP Top 10** 安全风险分类
 
-`mcp-lint` 做的事情很简单：读你的 MCP 配置 → 跑 10 项静态安全检查 → 5 秒出 CVSS 评分安全报告。完全离线，不上传任何配置到云端，不依赖任何外部 API。
+`mcp-lint` 做的事情很简单：读你的 MCP 配置 → 跑 10 项静态安全检查 → 5 秒出 CVSS 评分安全报告。完全离线，不上传任何配置到云端，不依赖任何外部 API。**小小插件，为你的电脑保驾护航。**
 
 ## 与其他扫描器的区别
 
