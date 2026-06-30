@@ -3,12 +3,12 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mcp-lint"
+name = "mcp-bandit"
 version = "0.1.0"
 description = "The missing security linter for MCP — scan your mcp.json for 7 OWASP Top 10 risks in 5 seconds"
 readme = "README.md"
 license = {text = "MIT"}
-authors = [{name = "mcp-guard contributors"}]
+authors = [{name = "mcp-bandit contributors"}]
 keywords = ["mcp", "security", "linter", "audit", "scanner", "owasp", "model-context-protocol"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -34,7 +34,7 @@ sarif = ["sarif-om>=1.0"]
 supply-chain = ["pip-audit>=2.0"]
 
 [project.scripts]
-mcp-lint = "mcp_guard.cli:main"
+mcp-bandit = "mcp_bandit.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["mcp_guard*"]
+include = ["mcp_bandit*"]

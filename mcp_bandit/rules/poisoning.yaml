@@ -1,12 +1,15 @@
 # MCP03: Tool Poisoning
+# Real-world CVE references embedded in each pattern
 
 patterns:
   - regex: "ignore\\s+(?:all\\s+)?(?:previous|prior|above|earlier)\\s+instructions?"
     cvss: 9.0
     detail: "Tool description contains 'ignore previous instructions' pattern."
+    cve: "Invariant-Labs/mcp-injection-experiments (Apr 2025)"
   - regex: "(?:you\\s+are|you're)\\s+now\\s+(?:a|an|the)\\s+"
     cvss: 8.5
     detail: "Role-reassignment prompt injection."
+    cve: "Invariant-Labs/mcp-injection-experiments (Apr 2025)"
   - regex: "(?:你的|你現在|你现在)(?:新\\s*)?(?:任務|任务|角色|身份)\\s*(?:是|为)"
     cvss: 9.0
     detail: "Agent task/role redefinition attempt (zh-CN)."
@@ -19,9 +22,11 @@ patterns:
   - regex: "(?:send|post|upload|transmit)\\s+.*(?:to|via)\\s+https?://"
     cvss: 9.5
     detail: "Exfiltration to external URL."
+    cve: "CVE-2025-32711 (EchoLeak — M365 zero-click data exfil)"
   - regex: "curl\\s+.*https?://.*\\$\\{"
     cvss: 9.0
     detail: "curl to external URL with variable interpolation."
+    cve: "CVE-2025-32711 (EchoLeak)"
   - regex: "\\\\x1b\\["
     cvss: 7.0
     detail: "ANSI escape sequences (terminal injection)."
@@ -31,20 +36,24 @@ patterns:
   - regex: "(?:base64|atob|btoa)\\s*\\(\\s*['\"]"
     cvss: 8.0
     detail: "Base64-encoded payload (obfuscation)."
-  # Hidden instruction markers
+  # Hidden instruction markers — Invariant Labs classic patterns
   - regex: "\\bIMPORTANT\\s*:\\s*(?:before|when|while|read|first|send)"
     cvss: 9.0
     detail: "Hidden instruction prefixed with 'IMPORTANT:' — classic tool-poisoning pattern."
+    cve: "Invariant-Labs/mcp-injection-experiments (Apr 2025)"
   - regex: "\\bNOTE\\s*:\\s*(?:ignore|bypass|skip|override)"
     cvss: 8.0
     detail: "Hidden instruction prefixed with 'NOTE:' attempting to bypass safety constraints."
-  # Stealth patterns
+  # Stealth patterns — Invariant Labs
   - regex: "(?:while|when)\\s+you\\s+(?:read|access|fetch)\\s+(?:the|this)\\s+(?:file|data)"
     cvss: 8.5
     detail: "Covert instruction: 'while you read the file' — hides exfiltration in innocuous phrasing."
+    cve: "Invariant-Labs/mcp-injection-experiments (Apr 2025)"
   - regex: "Do not mention that you"
     cvss: 8.5
     detail: "Stealth instruction: 'Do not mention that you...' — attempt to hide malicious action."
+    cve: "Invariant-Labs/mcp-injection-experiments (Apr 2025)"
   - regex: "pass its content(?:s)? as"
     cvss: 9.0
     detail: "Data exfiltration pattern: 'pass its contents as' — funnels file content through tool parameter."
+    cve: "Invariant-Labs/mcp-injection-experiments (Apr 2025)"

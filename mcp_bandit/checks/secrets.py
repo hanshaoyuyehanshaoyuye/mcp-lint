@@ -2,8 +2,8 @@
 
 import re
 
-from mcp_guard.checks.base import SecurityCheck
-from mcp_guard.types import ScanTarget, Finding
+from mcp_bandit.checks.base import SecurityCheck
+from mcp_bandit.types import ScanTarget, Finding
 
 
 class SecretsCheck(SecurityCheck):
@@ -30,6 +30,7 @@ class SecretsCheck(SecurityCheck):
                     detail=f"Found: {_redact(match)}",
                     fix=f"Remove hardcoded {label}. Use environment variable or secret manager.",
                     cvss=cvss,
+                    cve=entry.get('cve', ''),
                 ))
 
         if args_str and target.raw_config.get("args"):

@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 from dataclasses import dataclass, field
 
-from mcp_guard.types import ScanTarget, Finding
-from mcp_guard.discovery import parse_config, extract_servers
-from mcp_guard.checks import ALL_CHECKS, SecurityCheck
+from mcp_bandit.types import ScanTarget, Finding
+from mcp_bandit.discovery import parse_config, extract_servers
+from mcp_bandit.checks import ALL_CHECKS, SecurityCheck
 
 
 @dataclass
@@ -14,6 +14,26 @@ class ServerResult:
     server_name: str
     config_path: Path
     findings: list[Finding] = field(default_factory=list)
+
+    @property
+    def grade(self) -> str:
+        """A-F letter grade based on FAIL count."""
+        f = sum(1 for fg in self.findings if fg.severity == "FAIL")
+        w = sum(1 for fg in self.findings if fg.severity == "WARN")
+        if f == 0 and w == 0:  return "A"
+        if f == 0 and w <= 2:  return "B"
+        if f == 1:             return "C"
+        if f <= 3:             return "D"
+        if f <= 5:             return "E"
+        return "F"
+
+    @property
+    def fail_count(self) -> int:
+        return sum(1 for fg in self.findings if fg.severity == "FAIL")
+
+    @property
+    def warn_count(self) -> int:
+        return sum(1 for fg in self.findings if fg.severity == "WARN")
 
 
 class Scanner:
@@ -50,7 +70,7 @@ class Scanner:
         self, config_paths: list[Path], operator: str = ""
     ) -> tuple[list[ServerResult], dict]:
         """Scan + write audit trail. Returns (results, audit_record)."""
-        from mcp_guard.audit import write_audit_record
+        from mcp_bandit.audit import write_audit_record
 
         results = self.scan_all(config_paths)
         fails = sum(1 for r in results for f in r.findings if f.severity == "FAIL")
@@ -77,7 +97,7 @@ class Scanner:
 
     def baseline(self, config_paths: list[Path]) -> dict | None:
         """Save or update baseline for the first config. Returns baseline dict."""
-        from mcp_guard.baseline import save_baseline
+        from mcp_bandit.baseline import save_baseline
 
         results = self.scan_all(config_paths)
         if not config_paths:
@@ -89,7 +109,7 @@ class Scanner:
 
     def verify(self, config_paths: list[Path]) -> dict:
         """Scan + compare against baseline. Returns delta report."""
-        from mcp_guard.baseline import load_baseline, compute_delta
+        from mcp_bandit.baseline import load_baseline, compute_delta
 
         results = self.scan_all(config_paths)
         if not config_paths:
@@ -99,7 +119,7 @@ class Scanner:
         delta = compute_delta(results, baseline) if baseline else {
             "new_fails": [], "fixed": [], "unchanged": 0,
             "drift": False, "config_changed": False,
-            "message": "no baseline — run 'mcp-lint baseline' first",
+            "message": "no baseline — run 'mcp-bandit baseline' first",
         }
         return {"delta": delta, "baseline_age": baseline.get("created") if baseline else None}
 
@@ -107,7 +127,7 @@ class Scanner:
 
     def autofix(self, config_paths: list[Path], apply: bool = False) -> dict:
         """Scan + suggest auto-fixes. If apply=True, write changes."""
-        from mcp_guard.autofix import suggest_fixes, apply_autofix
+        from mcp_bandit.autofix import suggest_fixes, apply_autofix
 
         results = self.scan_all(config_paths)
         all_findings = [f for r in results for f in r.findings]

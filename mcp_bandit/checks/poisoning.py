@@ -2,8 +2,8 @@
 
 import re
 
-from mcp_guard.checks.base import SecurityCheck
-from mcp_guard.types import ScanTarget, Finding
+from mcp_bandit.checks.base import SecurityCheck
+from mcp_bandit.types import ScanTarget, Finding
 
 
 class PoisoningCheck(SecurityCheck):
@@ -27,6 +27,7 @@ class PoisoningCheck(SecurityCheck):
                         detail=detail,
                         fix="Verify tool description source. Remove instruction-manipulation language.",
                         cvss=cvss_f,
+                        cve=entry.get('cve', ''),
                     ))
                 else:
                     findings.append(self._warn(target,
@@ -34,6 +35,7 @@ class PoisoningCheck(SecurityCheck):
                         detail=detail,
                         fix="Review tool description for trustworthiness.",
                         cvss=cvss_f,
+                        cve=entry.get('cve', ''),
                     ))
 
         if not findings:

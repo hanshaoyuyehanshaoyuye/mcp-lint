@@ -2,8 +2,8 @@
 
 import re
 
-from mcp_guard.checks.base import SecurityCheck
-from mcp_guard.types import ScanTarget, Finding
+from mcp_bandit.checks.base import SecurityCheck
+from mcp_bandit.types import ScanTarget, Finding
 
 
 class ContextInjectionCheck(SecurityCheck):
@@ -27,6 +27,7 @@ class ContextInjectionCheck(SecurityCheck):
                         detail=detail,
                         fix="Validate data source authorship. Sanitize retrieved content before LLM consumption.",
                         cvss=cvss_f,
+                        cve=entry.get('cve', ''),
                     ))
                 else:
                     findings.append(self._warn(target,
@@ -34,6 +35,7 @@ class ContextInjectionCheck(SecurityCheck):
                         detail=detail,
                         fix="Review data-source configuration for untrusted input.",
                         cvss=cvss_f,
+                        cve=entry.get('cve', ''),
                     ))
 
         # Check for untrusted data source indicators

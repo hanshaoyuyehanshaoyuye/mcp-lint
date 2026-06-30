@@ -7,5 +7,5 @@ build/
 venv/
 .env
 *.egg
-.mcp-lint.lock
-.mcp-lint-audit.jsonl
+.mcp-bandit.lock
+.mcp-bandit-audit.jsonl

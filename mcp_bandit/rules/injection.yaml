@@ -22,9 +22,11 @@ patterns:
   - regex: "\\bcmd\\.exe\\b"
     label: "cmd.exe (Windows shell)"
     cvss: 9.5
+    cve: "CVE-2025-54136 (MCPoison — Cursor IDE RCE)"
   - regex: "\\bpowershell\\.exe\\b"
     label: "powershell.exe (Windows shell)"
     cvss: 9.5
+    cve: "CVE-2025-54136 (MCPoison)"
   - regex: "\\bwscript\\.exe\\b"
     label: "wscript.exe (Windows Script Host)"
     cvss: 9.5

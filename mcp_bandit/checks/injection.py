@@ -2,8 +2,8 @@
 
 import re
 
-from mcp_guard.checks.base import SecurityCheck
-from mcp_guard.types import ScanTarget, Finding
+from mcp_bandit.checks.base import SecurityCheck
+from mcp_bandit.types import ScanTarget, Finding
 
 
 class InjectionCheck(SecurityCheck):
@@ -24,6 +24,7 @@ class InjectionCheck(SecurityCheck):
                     detail=f"Config references {entry['label']}. User input could be injected.",
                     fix="Replace with subprocess.run(args_list, shell=False) or use shlex.quote().",
                     cvss=float(entry["cvss"]),
+                    cve=entry.get('cve', ''),
                 ))
 
         args_str = self._args_str(target)

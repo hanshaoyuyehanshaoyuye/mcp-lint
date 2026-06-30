@@ -1,4 +1,4 @@
-# 🔐 mcp-lint — MCP 安全检测器
+# 🔐 mcp-bandit — MCP 安全检测器
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://python.org) [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE) [![OWASP](https://img.shields.io/badge/OWASP-MCP%20Top%2010-red)](https://owasp.org/www-project-mcp-top-10/)
 
@@ -7,7 +7,7 @@
 </p>
 
 <pre align="center">
-pip install mcp-lint && mcp-lint scan
+pip install mcp-bandit && mcp-bandit scan
 </pre>
 
 <p align="center">
@@ -25,16 +25,16 @@ Your `mcp.json` is 30 lines of JSON. It also gives AI agents access to your file
 - 78.3% attack success rate with 5 MCP servers connected to one agent *(Unit 42, 2026)*
 - OWASP published a dedicated **MCP Top 10** for this exact problem
 
-`mcp-lint` is to MCP what `eslint` is to JavaScript — a static linter that catches security issues before they become incidents.
+`mcp-bandit` is to MCP what `eslint` is to JavaScript — a static linter that catches security issues before they become incidents.
 
 ---
 
 ## What makes it different?
 
-| | mcp-lint | Other scanners |
+| | mcp-bandit | Other scanners |
 |---|---------|---------------|
 | **Runtime** | Offline — nothing leaves your machine | Most require Groq / Cisco / LLM API keys |
-| **Install** | `pip install mcp-lint` | npm / npx / Rust / Go / Docker — pick an ecosystem |
+| **Install** | `pip install mcp-bandit` | npm / npx / Rust / Go / Docker — pick an ecosystem |
 | **Detections** | 10/10 OWASP MCP Top 10 | Most cover 5-7 |
 | **Rules** | YAML files — extensible without touching code | Hardcoded regex — you can't add your own |
 | **Closed-loop** | scan → baseline → verify → audit | scan → done (no drift detection, no tamper-proof log) |
@@ -46,14 +46,14 @@ Your `mcp.json` is 30 lines of JSON. It also gives AI agents access to your file
 ## Quick start
 
 ```bash
-pip install mcp-lint
-mcp-lint scan
+pip install mcp-bandit
+mcp-bandit scan
 ```
 
 That's it. It auto-discovers MCP configs across Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, Gemini CLI, and Codex CLI.
 
 ```
-mcp-lint v0.2.0 — MCP Security Linter
+mcp-bandit v0.2.0 — MCP Security Linter
 ═══════════════════════════════════════════════
 Targets: ~/.claude.json
 Servers: 2 | PASS: 13 | WARN: 1 | FAIL: 0
@@ -97,17 +97,17 @@ mcp.json ──→ scan ──→ 10 checks ──→ report
      ┌──────────┴──────────┐           │
      ▼                     ▼           ▼
   baseline             audit trail
-(.mcp-lint.lock)  (~/.mcp-lint-audit.jsonl)
+(.mcp-bandit.lock)  (~/.mcp-bandit-audit.jsonl)
      │              hash-chained,
      ▼              tamper-evident
   verify
 (drift detection:
  new FAILs → gate blocks)
 
-mcp-lint baseline      # Snapshot current state
-mcp-lint verify --gate # CI: refuse PRs that introduce new FAILs
-mcp-lint audit         # Who scanned what, when — immutably logged
-mcp-lint autofix       # Auto-apply high-confidence fixes
+mcp-bandit baseline      # Snapshot current state
+mcp-bandit verify --gate # CI: refuse PRs that introduce new FAILs
+mcp-bandit audit         # Who scanned what, when — immutably logged
+mcp-bandit autofix       # Auto-apply high-confidence fixes
 ```
 
 ---
@@ -115,10 +115,10 @@ mcp-lint autofix       # Auto-apply high-confidence fixes
 ## Extend it — YAML rules, no code changes
 
 ```bash
-mcp-lint scan --rules my-org-rules.yaml
+mcp-bandit scan --rules my-org-rules.yaml
 ```
 
-Every check reads from `mcp_guard/rules/<check>.yaml`. Add your own patterns, adjust CVSS scores, or define organization-specific sensitive keys — without touching Python.
+Every check reads from `mcp_bandit/rules/<check>.yaml`. Add your own patterns, adjust CVSS scores, or define organization-specific sensitive keys — without touching Python.
 
 Example `my-org-rules.yaml`:
 ```yaml
@@ -135,10 +135,10 @@ checks:
 ## From source
 
 ```bash
-git clone https://github.com/hanshaoyuyehanshaoyuye/mcp-lint.git
-cd mcp-lint
+git clone https://github.com/hanshaoyuyehanshaoyuye/mcp-bandit.git
+cd mcp-bandit
 pip install -e .
-mcp-lint scan
+mcp-bandit scan
 ```
 
 ---
@@ -149,9 +149,9 @@ mcp-lint scan
   <b><i>你的 mcp.json 有 30 行。其中 10 行可能是漏洞。</i></b>
 </p>
 
-## `mcp-lint` 是什么
+## `mcp-bandit` 是什么
 
-`mcp-lint` 是 MCP 协议世界缺失的安全检查器——就像 `eslint` 之于 JavaScript。
+`mcp-bandit` 是 MCP 协议世界缺失的安全检查器——就像 `eslint` 之于 JavaScript。
 
 你每连接一个 MCP 服务器，就等于给 AI 代理开放了文件系统、Shell 和网络权限。你的 `mcp.json` 只有 30 行 JSON，但攻击面等同于一个完整应用——**而且没人审计它**。
 
@@ -159,16 +159,16 @@ mcp-lint scan
 - 单个 AI 代理连接 5 个 MCP 服务器时，**攻击成功率 78.3%**（Unit 42, 2026）
 - OWASP 为此专门发布了 **MCP Top 10** 安全风险分类
 
-`mcp-lint` 做的事情很简单：读你的 MCP 配置 → 跑 10 项静态安全检查 → 5 秒出 CVSS 评分安全报告。完全离线，不上传任何配置到云端，不依赖任何外部 API。**小小插件，为你的电脑保驾护航。**
+`mcp-bandit` 做的事情很简单：读你的 MCP 配置 → 跑 10 项静态安全检查 → 5 秒出 CVSS 评分安全报告。完全离线，不上传任何配置到云端，不依赖任何外部 API。**小小插件，为你的电脑保驾护航。**
 
 ## 与其他扫描器的区别
 
-`mcp-lint` 是目前唯一满足以下所有条件的 MCP 安全扫描器：
+`mcp-bandit` 是目前唯一满足以下所有条件的 MCP 安全扫描器：
 
-| | mcp-lint | 其他 |
+| | mcp-bandit | 其他 |
 |---|---------|------|
 | **运行方式** | 完全离线，配置不离开本机 | 多数需要上传到云端或调 LLM API |
-| **安装** | `pip install mcp-lint`，Python 用户一键装 | npm / npx / Rust / Go / Docker，各管各的 |
+| **安装** | `pip install mcp-bandit`，Python 用户一键装 | npm / npx / Rust / Go / Docker，各管各的 |
 | **覆盖率** | **10/10** OWASP MCP Top 10 全覆盖 | 大多数仅覆盖 5-7 项 |
 | **规则扩展** | YAML 文件，不改源码就能加规则 | 正则硬编码在源码里 |
 | **闭环** | 扫描 → 基线快照 → 漂移检测 → 不可篡改审计日志 | 扫描 → 结束（无基线对比，无审计链） |
@@ -178,11 +178,11 @@ mcp-lint scan
 ## 快速开始
 
 ```bash
-pip install mcp-lint
-mcp-lint scan          # 自动发现并扫描所有 MCP 配置
-mcp-lint list-checks   # 列出全部 10 项检查
-mcp-lint scan --json   # JSON 输出，适合脚本消费
-mcp-lint scan --sarif  # SARIF 格式，接入 GitHub Actions CI
+pip install mcp-bandit
+mcp-bandit scan          # 自动发现并扫描所有 MCP 配置
+mcp-bandit list-checks   # 列出全部 10 项检查
+mcp-bandit scan --json   # JSON 输出，适合脚本消费
+mcp-bandit scan --sarif  # SARIF 格式，接入 GitHub Actions CI
 ```
 
 ## 10 项安全检查（OWASP MCP Top 10 全覆盖）
@@ -210,32 +210,32 @@ mcp.json ──→ scan ──→ 10 项检查 ──→ 报告
      ┌──────────┴──────────┐           │
      ▼                     ▼           ▼
   baseline 快照        audit 审计日志
-(.mcp-lint.lock)  (~/.mcp-lint-audit.jsonl)
+(.mcp-bandit.lock)  (~/.mcp-bandit-audit.jsonl)
      │              SHA-256 哈希链,
      ▼              不可篡改
   verify 验证
 (漂移检测:
  新 FAIL → CI 阻断)
 
-mcp-lint baseline      # 拍快照：记录当前状态作为基线
-mcp-lint verify --gate # CI 闸门：PR 引入新 FAIL 则拒绝合并
-mcp-lint audit         # 审计链：谁在何时扫描了什么，不可篡改
-mcp-lint autofix       # 自动修复：高置信度修复自动应用
+mcp-bandit baseline      # 拍快照：记录当前状态作为基线
+mcp-bandit verify --gate # CI 闸门：PR 引入新 FAIL 则拒绝合并
+mcp-bandit audit         # 审计链：谁在何时扫描了什么，不可篡改
+mcp-bandit autofix       # 自动修复：高置信度修复自动应用
 ```
 
 ## 自定义规则（不改源码）
 
 ```bash
-mcp-lint scan --rules my-rules.yaml   # 加载自定义检测规则
+mcp-bandit scan --rules my-rules.yaml   # 加载自定义检测规则
 ```
 
-所有检测规则在 `mcp_guard/rules/` 目录下以 YAML 格式存储。你可以添加自己的检测模式、调整 CVSS 评分、定义组织专属的敏感密钥模式——不需要动一行 Python 代码。
+所有检测规则在 `mcp_bandit/rules/` 目录下以 YAML 格式存储。你可以添加自己的检测模式、调整 CVSS 评分、定义组织专属的敏感密钥模式——不需要动一行 Python 代码。
 
 ## 项目结构
 
 ```
-mcp-guard/
-├── mcp_guard/
+mcp-bandit/
+├── mcp_bandit/
 │   ├── checks/          # 10 个安全检查（全部继承 SecurityCheck ABC）
 │   ├── rules/           # 10 个 YAML 规则文件（用户可扩展）
 │   ├── scanner.py       # 编排中心（scan / baseline / verify / autofix / audit）
@@ -253,10 +253,10 @@ mcp-guard/
 ## 源码安装
 
 ```bash
-git clone https://github.com/hanshaoyuyehanshaoyuye/mcp-lint.git
-cd mcp-lint
+git clone https://github.com/hanshaoyuyehanshaoyuye/mcp-bandit.git
+cd mcp-bandit
 pip install -e .
-mcp-lint scan
+mcp-bandit scan
 ```
 
 ---

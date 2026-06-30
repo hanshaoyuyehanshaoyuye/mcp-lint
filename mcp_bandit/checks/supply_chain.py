@@ -2,8 +2,8 @@
 
 import re
 
-from mcp_guard.checks.base import SecurityCheck
-from mcp_guard.types import ScanTarget, Finding
+from mcp_bandit.checks.base import SecurityCheck
+from mcp_bandit.types import ScanTarget, Finding
 
 
 class SupplyChainCheck(SecurityCheck):

@@ -6,17 +6,17 @@ from pathlib import Path
 import click
 from rich.console import Console
 
-from mcp_guard import __version__
-from mcp_guard.scanner import Scanner
-from mcp_guard.reporter import Reporter
+from mcp_bandit import __version__
+from mcp_bandit.scanner import Scanner
+from mcp_bandit.reporter import Reporter
 
 console = Console()
 
 
 @click.group()
-@click.version_option(__version__, prog_name="mcp-lint")
+@click.version_option(__version__, prog_name="mcp-bandit")
 def main():
-    """mcp-lint — the missing security linter for MCP."""
+    """mcp-bandit — the missing security linter for MCP."""
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -43,7 +43,7 @@ def scan(target, output_format, checks, output, quiet, with_audit, rules):
 
     check_ids = [c.strip() for c in checks.split(",")] if checks else None
     if rules:
-        from mcp_guard.checks.base import SecurityCheck
+        from mcp_bandit.checks.base import SecurityCheck
         SecurityCheck.set_rules_dir(rules)
     scanner = Scanner(check_ids=check_ids)
 
@@ -86,10 +86,10 @@ def baseline(target, show_baseline):
     config_path = targets[0]
 
     if show_baseline:
-        from mcp_guard.baseline import load_baseline
+        from mcp_bandit.baseline import load_baseline
         bl = load_baseline(config_path)
         if not bl:
-            console.print("No baseline found. Run 'mcp-lint baseline' first.", style="yellow")
+            console.print("No baseline found. Run 'mcp-bandit baseline' first.", style="yellow")
             sys.exit(1)
         import json
         console.print(json.dumps(bl, indent=2, ensure_ascii=False))
@@ -98,7 +98,7 @@ def baseline(target, show_baseline):
     result = scanner.baseline(targets)
     console.print(f"[green]Baseline saved: {result['lock_path']}[/green]")
     console.print(f"  Servers: {result['servers']}")
-    console.print(f"  Run 'mcp-lint verify' to check for drift.")
+    console.print(f"  Run 'mcp-bandit verify' to check for drift.")
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -187,7 +187,7 @@ def autofix(target, apply):
 def audit(verify_chain, limit):
     """Show audit trail or verify chain integrity."""
 
-    from mcp_guard.audit import read_audit_log, verify_chain as _verify
+    from mcp_bandit.audit import read_audit_log, verify_chain as _verify
 
     if verify_chain:
         valid, msg = _verify()
@@ -200,7 +200,7 @@ def audit(verify_chain, limit):
 
     records = read_audit_log(limit)
     if not records:
-        console.print("No audit records found. Run 'mcp-lint scan --audit' first.", style="yellow")
+        console.print("No audit records found. Run 'mcp-bandit scan --audit' first.", style="yellow")
         return
 
     for r in records:
@@ -237,5 +237,5 @@ def _resolve_targets(target: str | None) -> list[Path]:
             return sorted(p.glob("**/mcp*.json")) + sorted(p.glob("**/claude_desktop_config.json"))
         console.print(f"Warning: {target} not found, falling back to auto-discovery", style="yellow")
 
-    from mcp_guard.discovery import discover_configs
+    from mcp_bandit.discovery import discover_configs
     return discover_configs()

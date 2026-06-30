@@ -1,6 +1,6 @@
 """Baseline Engine — snapshot, compare, track drift.
 
-Lockfile format (.mcp-lint.lock, placed next to mcp.json):
+Lockfile format (.mcp-bandit.lock, placed next to mcp.json):
   {
     "version": 1,
     "created": "ISO8601",
@@ -13,12 +13,12 @@ Lockfile format (.mcp-lint.lock, placed next to mcp.json):
   }
 
 Workflow:
-  1. mcp-lint scan → report
+  1. mcp-bandit scan → report
   2. Review findings, fix issues
-  3. mcp-lint baseline → snapshot current state
-  4. Later: mcp-lint scan → compares against baseline, shows delta
+  3. mcp-bandit baseline → snapshot current state
+  4. Later: mcp-bandit scan → compares against baseline, shows delta
   5. If new FAILs → gate blocks (CI exit 1)
-  6. After review: mcp-lint baseline --update
+  6. After review: mcp-bandit baseline --update
 """
 
 import hashlib
@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 
-LOCKFILE_NAME = ".mcp-lint.lock"
+LOCKFILE_NAME = ".mcp-bandit.lock"
 
 
 def hash_config(config_path: Path) -> str:

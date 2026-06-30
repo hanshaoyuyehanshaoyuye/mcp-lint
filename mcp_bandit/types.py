@@ -1,4 +1,4 @@
-"""Shared data types — no imports from other mcp_guard modules."""
+"""Shared data types — no imports from other mcp_bandit modules."""
 
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -21,3 +21,4 @@ class Finding:
     detail: str
     fix: str = ""
     cvss: float = 0.0
+    cve: str = ""

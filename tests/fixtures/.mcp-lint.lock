@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "created": "2026-06-30T07:16:35.824659+00:00",
+  "config_hash": "15cb05178a5b716b442a818accf2bf49135d14cfa8c7d0c182101ed6a06aee22",
+  "findings_hash": "d1a0bce3f2b70eca7f3deef08dee2cd210e3adbe9a12ec5e479644db4a16540b",
+  "server_count": 4,
+  "findings": {
+    "insecure-server": {
+      "MCP01": "WARN",
+      "MCP02": "WARN",
+      "MCP03": "PASS",
+      "MCP04": "PASS",
+      "MCP05": "WARN",
+      "MCP06": "PASS",
+      "MCP07": "PASS",
+      "MCP08": "WARN",
+      "MCP09": "PASS",
+      "MCP10": "PASS"
+    },
+    "poisoned-server": {
+      "MCP01": "PASS",
+      "MCP02": "WARN",
+      "MCP03": "FAIL",
+      "MCP04": "PASS",
+      "MCP05": "PASS",
+      "MCP06": "PASS",
+      "MCP07": "PASS",
+      "MCP08": "WARN",
+      "MCP09": "PASS",
+      "MCP10": "PASS"
+    },
+    "no-auth-http": {
+      "MCP01": "PASS",
+      "MCP02": "WARN",
+      "MCP03": "PASS",
+      "MCP04": "PASS",
+      "MCP05": "PASS",
+      "MCP06": "PASS",
+      "MCP07": "FAIL",
+      "MCP08": "FAIL",
+      "MCP09": "PASS",
+      "MCP10": "PASS"
+    },
+    "broad-filesystem": {
+      "MCP01": "PASS",
+      "MCP02": "WARN",
+      "MCP03": "PASS",
+      "MCP04": "PASS",
+      "MCP05": "PASS",
+      "MCP06": "PASS",
+      "MCP07": "PASS",
+      "MCP08": "WARN",
+      "MCP09": "PASS",
+      "MCP10": "PASS"
+    }
+  },
+  "remediated": []
+}

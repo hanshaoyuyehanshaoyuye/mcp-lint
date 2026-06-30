@@ -1,4 +1,4 @@
-"""Integration tests for mcp-guard scanner."""
+"""Integration tests for mcp-bandit scanner."""
 
 import json
 import sys
@@ -6,8 +6,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from mcp_guard.discovery import parse_config, extract_servers
-from mcp_guard.scanner import Scanner
+from mcp_bandit.discovery import parse_config, extract_servers
+from mcp_bandit.scanner import Scanner
 
 
 FIXTURES = Path(__file__).parent / "fixtures"

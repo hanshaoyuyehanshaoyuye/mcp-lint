@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 import yaml
 
-from mcp_guard.types import ScanTarget, Finding
+from mcp_bandit.types import ScanTarget, Finding
 
 RULES_DIR = os.path.join(os.path.dirname(__file__), "..", "rules")
 
@@ -19,7 +19,7 @@ class SecurityCheck(ABC):
       id       — check ID (MCP01..MCP10)
       name     — human-readable name
       owasp    — OWASP MCP Top 10 mapping, e.g. "MCP01: Token Mismanagement"
-      rule_file — YAML filename in mcp_guard/rules/ (None = no external rules)
+      rule_file — YAML filename in mcp_bandit/rules/ (None = no external rules)
 
     They implement run(target) → list[Finding].
     """
@@ -39,7 +39,7 @@ class SecurityCheck(ABC):
     # ── rules loader ───────────────────────────
 
     def _load_rules(self) -> dict[str, Any]:
-        """Load YAML rules from mcp_guard/rules/<rule_file>. Returns {} if not found."""
+        """Load YAML rules from mcp_bandit/rules/<rule_file>. Returns {} if not found."""
         if not self.rule_file:
             return {}
         path = os.path.join(self._rules_dir, self.rule_file)
@@ -69,16 +69,16 @@ class SecurityCheck(ABC):
             severity="PASS", title=title, detail=detail, cvss=0,
         )
 
-    def _warn(self, target: ScanTarget, title: str, detail: str, fix: str = "", cvss: float = 5.0) -> Finding:
+    def _warn(self, target: ScanTarget, title: str, detail: str, fix: str = "", cvss: float = 5.0, cve: str = "") -> Finding:
         return Finding(
             check_id=self.id, owasp=self.owasp,
             server_name=target.server_name,
-            severity="WARN", title=title, detail=detail, fix=fix, cvss=cvss,
+            severity="WARN", title=title, detail=detail, fix=fix, cvss=cvss, cve=cve,
         )
 
-    def _fail(self, target: ScanTarget, title: str, detail: str, fix: str = "", cvss: float = 7.0) -> Finding:
+    def _fail(self, target: ScanTarget, title: str, detail: str, fix: str = "", cvss: float = 7.0, cve: str = "") -> Finding:
         return Finding(
             check_id=self.id, owasp=self.owasp,
             server_name=target.server_name,
-            severity="FAIL", title=title, detail=detail, fix=fix, cvss=cvss,
+            severity="FAIL", title=title, detail=detail, fix=fix, cvss=cvss, cve=cve,
         )

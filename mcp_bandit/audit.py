@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 
-AUDIT_FILE = os.path.expanduser("~/.mcp-lint-audit.jsonl")
+AUDIT_FILE = os.path.expanduser("~/.mcp-bandit-audit.jsonl")
 
 
 def _sha256(data: str) -> str:
