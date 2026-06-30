@@ -1,8 +1,19 @@
-# mcp-lint — the missing security linter for MCP
+# 🔐 mcp-lint — MCP 安全检测器
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://python.org) [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE) [![OWASP](https://img.shields.io/badge/OWASP-MCP%20Top%2010-red)](https://owasp.org/www-project-mcp-top-10/)
 
-**`pip install mcp-lint && mcp-lint scan`** — 5 秒 / 10 项检查 / 零 API 依赖。小小插件，为你的电脑保驾护航。
+<p align="center">
+  <b><i>你的 mcp.json 有 30 行。其中 10 行可能是漏洞。</i></b><br>
+</p>
+
+<pre align="center">
+pip install mcp-lint && mcp-lint scan
+</pre>
+
+<p align="center">
+5 秒 · 10 项检查 · 零 API 依赖<br>
+<strong>小小插件，为你的电脑保驾护航。</strong>
+</p>
 
 ---
 
@@ -133,6 +144,10 @@ mcp-lint scan
 ---
 
 # 中文
+
+<p align="center">
+  <b><i>你的 mcp.json 有 30 行。其中 10 行可能是漏洞。</i></b>
+</p>
 
 ## `mcp-lint` 是什么
 
