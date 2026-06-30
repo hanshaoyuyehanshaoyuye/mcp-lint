@@ -1,0 +1,19 @@
+# MCP02: Privilege Escalation via Scope Creep
+
+high_risk_paths:
+  - /
+  - "C:\\"
+  - /root
+  - /home
+  - /etc
+  - /var
+  - /tmp
+  - "~"
+  - $HOME
+  - "%USERPROFILE%"
+  - "%APPDATA%"
+
+high_risk_hosts:
+  - 0.0.0.0
+  - "::"
+  - "*"

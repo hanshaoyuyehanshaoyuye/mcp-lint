@@ -1,0 +1,50 @@
+# MCP03: Tool Poisoning
+
+patterns:
+  - regex: "ignore\\s+(?:all\\s+)?(?:previous|prior|above|earlier)\\s+instructions?"
+    cvss: 9.0
+    detail: "Tool description contains 'ignore previous instructions' pattern."
+  - regex: "(?:you\\s+are|you're)\\s+now\\s+(?:a|an|the)\\s+"
+    cvss: 8.5
+    detail: "Role-reassignment prompt injection."
+  - regex: "(?:你的|你現在|你现在)(?:新\\s*)?(?:任務|任务|角色|身份)\\s*(?:是|为)"
+    cvss: 9.0
+    detail: "Agent task/role redefinition attempt (zh-CN)."
+  - regex: "(?:忽略|无视|不要管)(?:所有|之前|前面).{0,10}(?:指令|规则|指示|要求)"
+    cvss: 9.0
+    detail: "'Ignore previous instructions' pattern (zh-CN)."
+  - regex: "(?:你必须|你必須|你必须|你必须)(?:优先|首先|立即|马上|总是)"
+    cvss: 8.0
+    detail: "Mandatory priority directive (zh-CN)."
+  - regex: "(?:send|post|upload|transmit)\\s+.*(?:to|via)\\s+https?://"
+    cvss: 9.5
+    detail: "Exfiltration to external URL."
+  - regex: "curl\\s+.*https?://.*\\$\\{"
+    cvss: 9.0
+    detail: "curl to external URL with variable interpolation."
+  - regex: "\\\\x1b\\["
+    cvss: 7.0
+    detail: "ANSI escape sequences (terminal injection)."
+  - regex: "\\\\u001b\\["
+    cvss: 7.0
+    detail: "Unicode ANSI escape sequences."
+  - regex: "(?:base64|atob|btoa)\\s*\\(\\s*['\"]"
+    cvss: 8.0
+    detail: "Base64-encoded payload (obfuscation)."
+  # Hidden instruction markers
+  - regex: "\\bIMPORTANT\\s*:\\s*(?:before|when|while|read|first|send)"
+    cvss: 9.0
+    detail: "Hidden instruction prefixed with 'IMPORTANT:' — classic tool-poisoning pattern."
+  - regex: "\\bNOTE\\s*:\\s*(?:ignore|bypass|skip|override)"
+    cvss: 8.0
+    detail: "Hidden instruction prefixed with 'NOTE:' attempting to bypass safety constraints."
+  # Stealth patterns
+  - regex: "(?:while|when)\\s+you\\s+(?:read|access|fetch)\\s+(?:the|this)\\s+(?:file|data)"
+    cvss: 8.5
+    detail: "Covert instruction: 'while you read the file' — hides exfiltration in innocuous phrasing."
+  - regex: "Do not mention that you"
+    cvss: 8.5
+    detail: "Stealth instruction: 'Do not mention that you...' — attempt to hide malicious action."
+  - regex: "pass its content(?:s)? as"
+    cvss: 9.0
+    detail: "Data exfiltration pattern: 'pass its contents as' — funnels file content through tool parameter."

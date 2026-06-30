@@ -1,0 +1,14 @@
+# MCP04: Supply Chain Attacks & Dependency Tampering
+
+npm_package_pattern: "(?:npx|npm)\\s+(?:-y\\s+)?(@?[a-z0-9][a-z0-9_.-]*/[a-z0-9][a-z0-9_.-]*|[a-z0-9][a-z0-9_.-]*)\\b"
+pip_package_pattern: "(?:pip|pipx|uvx|uv)\\s+(?:install|run)\\s+(-r\\s+\\S+\\s+)?(@?[a-zA-Z0-9][a-zA-Z0-9_.-]*)"
+
+suspicious_prefixes:
+  - "mcp-"
+  - "ai-"
+  - "agent-"
+  - "llm-"
+  - "rag-"
+  - "chatgpt-"
+  - "openai-"
+  - "claude-"

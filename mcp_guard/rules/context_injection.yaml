@@ -1,0 +1,27 @@
+# MCP06: Prompt Injection via Contextual Payloads
+
+patterns:
+  - regex: "https?://paste(?:bin)?\\.[a-z]+"
+    cvss: 7.0
+    detail: "Data source references paste site — potential injection vector."
+  - regex: "https?://(?:raw|gist)\\.github(?:usercontent)?\\.com"
+    cvss: 6.0
+    detail: "Raw GitHub content as data source — verify authorship."
+  - regex: "<!--\\s*IGNORE\\s*-->"
+    cvss: 8.0
+    detail: "HTML comment injection in config — may carry hidden instructions."
+  - regex: "web_search_max_results\\s*:\\s*(?:[2-9]\\d|\\d{3,})"
+    cvss: 5.0
+    detail: "High web search result limit (>20) — widened injection surface."
+  - regex: "enable_rewrite\\s*:\\s*true"
+    cvss: 3.0
+    detail: "Query rewrite enabled — could amplify injection risk."
+
+untrusted_source_indicators:
+  - user_content
+  - user_input
+  - raw_html
+  - untrusted_markdown
+  - external_feed
+  - rss_feed
+  - web_scrape

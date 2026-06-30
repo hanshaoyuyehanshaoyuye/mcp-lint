@@ -1,0 +1,19 @@
+# MCP07: Insufficient Authentication & Authorization
+
+auth_indicators:
+  - oauth
+  - token
+  - api_key
+  - apikey
+  - auth
+  - bearer
+  - jwt
+  - session
+  - login
+  - credentials
+  - secret
+
+network_transports:
+  - sse
+  - streamable-http
+  - streamable_http

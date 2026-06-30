@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "typo-attack": {
+      "command": "npx",
+      "args": ["-y", "mcp-filesystem-server"],
+      "cwd": "/tmp",
+      "env": {
+        "GITHUB_TOKEN": "ghp_MCPLINT_TEST_TOKEN_FIXTURE_FAKE_VALUE_PLACEHOLDER"
+      }
+    },
+    "legitimate": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "/home/user/projects"],
+      "cwd": "/home/user/projects"
+    }
+  },
+  "_comment": "npm typosquatting scenario: 'mcp-filesystem-server' vs legitimate '@modelcontextprotocol/server-filesystem'. The first is unscoped with suspicious prefix. Detection: MCP04 (unscoped 'mcp-' package + npx -y), MCP02 (broad paths in legitimate server but at least scoped)."
+}

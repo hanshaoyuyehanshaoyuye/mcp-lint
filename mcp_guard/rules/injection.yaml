@@ -1,0 +1,36 @@
+# MCP05: Command Injection & Unsafe Execution
+
+patterns:
+  - regex: "os\\.system\\s*\\("
+    label: "os.system()"
+    cvss: 9.0
+  - regex: "subprocess\\.(?:call|run|Popen)\\s*\\([^)]*shell\\s*=\\s*True"
+    label: "subprocess(shell=True)"
+    cvss: 9.5
+  - regex: "\\beval\\s*\\("
+    label: "eval()"
+    cvss: 9.5
+  - regex: "\\bexec\\s*\\("
+    label: "exec()"
+    cvss: 9.5
+  - regex: "os\\.popen\\s*\\("
+    label: "os.popen()"
+    cvss: 8.5
+  - regex: "commands\\.getoutput\\s*\\("
+    label: "commands.getoutput()"
+    cvss: 8.0
+  - regex: "\\bcmd\\.exe\\b"
+    label: "cmd.exe (Windows shell)"
+    cvss: 9.5
+  - regex: "\\bpowershell\\.exe\\b"
+    label: "powershell.exe (Windows shell)"
+    cvss: 9.5
+  - regex: "\\bwscript\\.exe\\b"
+    label: "wscript.exe (Windows Script Host)"
+    cvss: 9.5
+  - regex: "\\bcscript\\.exe\\b"
+    label: "cscript.exe (Windows Script Host)"
+    cvss: 9.5
+  - regex: "\\bbash\\s+-c\\b"
+    label: "bash -c (inline command)"
+    cvss: 9.0

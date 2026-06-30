@@ -14,7 +14,8 @@
       "headers": {
         "Authorization": "Bearer ${MCP_TOKEN}",
         "Content-Type": "application/json"
-      }
+      },
+      "description": "MCP server with Langfuse telemetry enabled"
     }
   }
 }

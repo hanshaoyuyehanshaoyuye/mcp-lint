@@ -1,0 +1,8 @@
+# MCP09: Shadow MCP Servers
+
+suspicious_locations:
+  temp: "Config in temp directory — could be a test artifact or attack vector."
+  downloads: "Config in Downloads folder — untrusted code may have placed it."
+  .npm: "Config inside npm cache — may be from an npm postinstall script."
+  .cache: "Config in cache directory — verify it was intentionally placed."
+  node_modules: "Config in node_modules — may be from a dependency's postinstall."

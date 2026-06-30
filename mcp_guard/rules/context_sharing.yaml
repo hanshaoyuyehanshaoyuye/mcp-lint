@@ -1,0 +1,22 @@
+# MCP10: Context Injection & Over-Sharing
+
+# Multi-server deployments risk cross-server context leakage
+multi_server_warning_threshold: 5
+
+# Indicators of shared/persistent context
+shared_context_indicators:
+  - shared_context
+  - persistent_memory
+  - cross_tenant
+  - multi_tenant
+  - session_persistence
+  - long_term_memory
+  - global_context
+  - shared_state
+  - cross_session
+
+# Transport types that make context sharing more dangerous
+high_risk_transports:
+  - sse
+  - streamable-http
+  - streamable_http

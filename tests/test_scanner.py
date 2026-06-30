@@ -79,7 +79,7 @@ def test_scan_vulnerable_config():
 
 def test_scanner_all_checks_registered():
     scanner = Scanner()
-    assert scanner.check_count == 7  # secrets, permissions, poisoning, supply_chain, injection, auth, shadow
+    assert scanner.check_count == 10  # OWASP MCP Top 10: complete coverage
 
 
 if __name__ == "__main__":
