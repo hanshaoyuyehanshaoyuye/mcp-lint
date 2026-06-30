@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "safe-stdio": {
+      "command": "python",
+      "args": ["-m", "my_safe_server"],
+      "env": {
+        "PYTHONPATH": "/opt/my-app",
+        "LOG_LEVEL": "info"
+      }
+    },
+    "safe-http": {
+      "type": "sse",
+      "url": "http://127.0.0.1:3001/sse",
+      "headers": {
+        "Authorization": "Bearer ${MCP_TOKEN}",
+        "Content-Type": "application/json"
+      }
+    }
+  }
+}

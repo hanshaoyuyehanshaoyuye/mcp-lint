@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-lint"
+version = "0.1.0"
+description = "The missing security linter for MCP — scan your mcp.json for 7 OWASP Top 10 risks in 5 seconds"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "mcp-guard contributors"}]
+keywords = ["mcp", "security", "linter", "audit", "scanner", "owasp", "model-context-protocol"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Topic :: Security",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0",
+    "rich>=13.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+sarif = ["sarif-om>=1.0"]
+supply-chain = ["pip-audit>=2.0"]
+
+[project.scripts]
+mcp-lint = "mcp_guard.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["mcp_guard*"]
