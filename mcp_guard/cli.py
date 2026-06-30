@@ -28,10 +28,11 @@ def main():
 @click.option("--format", "-f", "output_format",
               type=click.Choice(["terminal", "json", "sarif"]), default="terminal")
 @click.option("--checks", "-c", help="Comma-separated check IDs (default: all).")
+@click.option("--rules", "-r", help="Path to custom rules YAML or directory with check YAML files.")
 @click.option("--output", "-o", help="Write report to file.")
 @click.option("--quiet", "-q", is_flag=True, help="Only show FAIL/WARN, no summary.")
 @click.option("--audit", "with_audit", is_flag=True, help="Write tamper-evident audit trail record.")
-def scan(target, output_format, checks, output, quiet, with_audit):
+def scan(target, output_format, checks, output, quiet, with_audit, rules):
     """Scan MCP configs for security risks."""
 
     targets = _resolve_targets(target)
@@ -41,6 +42,9 @@ def scan(target, output_format, checks, output, quiet, with_audit):
         sys.exit(1)
 
     check_ids = [c.strip() for c in checks.split(",")] if checks else None
+    if rules:
+        from mcp_guard.checks.base import SecurityCheck
+        SecurityCheck.set_rules_dir(rules)
     scanner = Scanner(check_ids=check_ids)
 
     if with_audit:
