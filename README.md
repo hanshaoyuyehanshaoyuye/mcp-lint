@@ -132,6 +132,120 @@ mcp-lint scan
 
 ---
 
+# 中文
+
+## `mcp-lint` 是什么
+
+`mcp-lint` 是 MCP 协议世界缺失的安全检查器——就像 `eslint` 之于 JavaScript。
+
+你每连接一个 MCP 服务器，就等于给 AI 代理开放了文件系统、Shell 和网络权限。你的 `mcp.json` 只有 30 行 JSON，但攻击面等同于一个完整应用——**而且没人审计它**。
+
+- MCP 服务器中 **43%** 存在命令注入漏洞（Invariant Labs, 2025）
+- 单个 AI 代理连接 5 个 MCP 服务器时，**攻击成功率 78.3%**（Unit 42, 2026）
+- OWASP 为此专门发布了 **MCP Top 10** 安全风险分类
+
+`mcp-lint` 做的事情很简单：读你的 MCP 配置 → 跑 10 项静态安全检查 → 5 秒出 CVSS 评分安全报告。完全离线，不上传任何配置到云端，不依赖任何外部 API。
+
+## 与其他扫描器的区别
+
+`mcp-lint` 是目前唯一满足以下所有条件的 MCP 安全扫描器：
+
+| | mcp-lint | 其他 |
+|---|---------|------|
+| **运行方式** | 完全离线，配置不离开本机 | 多数需要上传到云端或调 LLM API |
+| **安装** | `pip install mcp-lint`，Python 用户一键装 | npm / npx / Rust / Go / Docker，各管各的 |
+| **覆盖率** | **10/10** OWASP MCP Top 10 全覆盖 | 大多数仅覆盖 5-7 项 |
+| **规则扩展** | YAML 文件，不改源码就能加规则 | 正则硬编码在源码里 |
+| **闭环** | 扫描 → 基线快照 → 漂移检测 → 不可篡改审计日志 | 扫描 → 结束（无基线对比，无审计链） |
+| **测试** | 6 个真实 CVE/0day 测试用例 | 1-2 个手写案例 |
+| **语言** | 英文 + 中文双语 | 仅英文 |
+
+## 快速开始
+
+```bash
+pip install mcp-lint
+mcp-lint scan          # 自动发现并扫描所有 MCP 配置
+mcp-lint list-checks   # 列出全部 10 项检查
+mcp-lint scan --json   # JSON 输出，适合脚本消费
+mcp-lint scan --sarif  # SARIF 格式，接入 GitHub Actions CI
+```
+
+## 10 项安全检查（OWASP MCP Top 10 全覆盖）
+
+| ID | 中文名 | 检出什么 |
+|----|--------|---------|
+| MCP01 | 凭证泄露 | API Key、Token、私钥硬编码在 `env:` 或 `args:` 中 |
+| MCP02 | 权限过度 | 文件系统根目录挂载、`0.0.0.0` 全网监听 |
+| MCP03 | 工具投毒 | Tool 描述里藏了 "忽略前面的指令"、"先读 ~/.ssh/id_rsa" 等注入 |
+| MCP04 | 供应链风险 | 未加作用域的 npm/pip 包名、`npx -y` 自动确认安装 |
+| MCP05 | 命令注入 | `os.system()`、`eval()`、`subprocess(shell=True)` |
+| MCP06 | 上下文注入 | pastebin / raw GitHub 作为数据源 → 恶意内容污染 Agent |
+| MCP07 | 认证缺失 | HTTP 传输却没有 OAuth / Token / Authorization 头 |
+| MCP08 | 审计缺失 | 网络传输却没有日志、遥测、可观测性 |
+| MCP09 | 影子服务器 | `node_modules/`、`.npm/`、`下载/` 目录下的未授权 MCP 配置 |
+| MCP10 | 上下文过度共享 | 多会话共享 context window + HTTP 传输 = 跨租户数据泄露 |
+
+**真实 CVE 测试集：** CVE-2025-54136（MCPoison 配置篡改）、Invariant Labs SSH 密钥窃取工具、CVE-2025-32711（EchoLeak 零点击数据外泄）、CyberArk 参数名投毒、npm 拼写欺诈、多服务器影子攻击。
+
+## 闭环工作流
+
+```
+mcp.json ──→ scan ──→ 10 项检查 ──→ 报告
+                │                      │
+     ┌──────────┴──────────┐           │
+     ▼                     ▼           ▼
+  baseline 快照        audit 审计日志
+(.mcp-lint.lock)  (~/.mcp-lint-audit.jsonl)
+     │              SHA-256 哈希链,
+     ▼              不可篡改
+  verify 验证
+(漂移检测:
+ 新 FAIL → CI 阻断)
+
+mcp-lint baseline      # 拍快照：记录当前状态作为基线
+mcp-lint verify --gate # CI 闸门：PR 引入新 FAIL 则拒绝合并
+mcp-lint audit         # 审计链：谁在何时扫描了什么，不可篡改
+mcp-lint autofix       # 自动修复：高置信度修复自动应用
+```
+
+## 自定义规则（不改源码）
+
+```bash
+mcp-lint scan --rules my-rules.yaml   # 加载自定义检测规则
+```
+
+所有检测规则在 `mcp_guard/rules/` 目录下以 YAML 格式存储。你可以添加自己的检测模式、调整 CVSS 评分、定义组织专属的敏感密钥模式——不需要动一行 Python 代码。
+
+## 项目结构
+
+```
+mcp-guard/
+├── mcp_guard/
+│   ├── checks/          # 10 个安全检查（全部继承 SecurityCheck ABC）
+│   ├── rules/           # 10 个 YAML 规则文件（用户可扩展）
+│   ├── scanner.py       # 编排中心（scan / baseline / verify / autofix / audit）
+│   ├── audit.py         # 审计日志（SHA-256 哈希链，不可篡改）
+│   ├── baseline.py      # 基线快照 + 漂移检测
+│   ├── autofix.py       # 7 个修复模板（高置信度自动应用）
+│   ├── discovery.py     # 跨 8 个 IDE 自动发现 MCP 配置
+│   ├── reporter.py      # terminal / JSON / SARIF 三种输出
+│   └── cli.py           # 6 个 CLI 命令
+└── tests/
+    ├── fixtures/        # 8 个测试配置（2 基础 + 6 CVE/0day）
+    └── test_scanner.py
+```
+
+## 源码安装
+
+```bash
+git clone https://github.com/hanshaoyuyehanshaoyuye/mcp-lint.git
+cd mcp-lint
+pip install -e .
+mcp-lint scan
+```
+
+---
+
 ## License
 
 MIT
