@@ -1,4 +1,4 @@
-"""MCP Guard CLI — entry point."""
+"""MCP Lint CLI — scan / baseline / autofix / verify / audit."""
 
 import sys
 from pathlib import Path
@@ -14,54 +14,40 @@ console = Console()
 
 
 @click.group()
-@click.version_option(__version__, prog_name="mcp-guard")
+@click.version_option(__version__, prog_name="mcp-lint")
 def main():
-    """mcp-lint — the missing security linter for MCP. Scan your mcp.json for 7 OWASP Top 10 risks."""
+    """mcp-lint — the missing security linter for MCP."""
 
+
+# ═══════════════════════════════════════════════════════════════════
+# scan
+# ═══════════════════════════════════════════════════════════════════
 
 @main.command()
-@click.option(
-    "--target", "-t",
-    help="Path to MCP config file or directory. Auto-discovers if omitted.",
-)
-@click.option(
-    "--format", "-f", "output_format",
-    type=click.Choice(["terminal", "json", "sarif"]),
-    default="terminal",
-    help="Output format (default: terminal).",
-)
-@click.option("--json", "output_format", flag_value="json", help="Shortcut for --format json.")
-@click.option("--sarif", "output_format", flag_value="sarif", help="Shortcut for --format sarif.")
-@click.option(
-    "--checks", "-c",
-    help="Comma-separated check IDs to run (default: all).",
-)
-@click.option(
-    "--output", "-o",
-    help="Write report to file instead of stdout.",
-)
-@click.option(
-    "--quiet", "-q", is_flag=True,
-    help="Only print findings, no summary.",
-)
-def scan(target, output_format, checks, output, quiet):
-    """Scan MCP server configurations for security risks."""
+@click.option("--target", "-t", help="Path to MCP config or directory. Auto-discovers if omitted.")
+@click.option("--format", "-f", "output_format",
+              type=click.Choice(["terminal", "json", "sarif"]), default="terminal")
+@click.option("--checks", "-c", help="Comma-separated check IDs (default: all).")
+@click.option("--output", "-o", help="Write report to file.")
+@click.option("--quiet", "-q", is_flag=True, help="Only show FAIL/WARN, no summary.")
+@click.option("--audit", "with_audit", is_flag=True, help="Write tamper-evident audit trail record.")
+def scan(target, output_format, checks, output, quiet, with_audit):
+    """Scan MCP configs for security risks."""
 
     targets = _resolve_targets(target)
-
     if not targets:
-        console.print("[red]No MCP config files found.[/red]")
-        console.print(
-            "[dim]Specify --target or ensure MCP configs exist in standard locations.[/dim]"
-        )
+        console.print("No MCP config files found.", style="red")
+        console.print("[dim]Specify --target or ensure MCP configs exist in standard locations.[/dim]")
         sys.exit(1)
 
-    check_ids = None
-    if checks:
-        check_ids = [c.strip() for c in checks.split(",")]
-
+    check_ids = [c.strip() for c in checks.split(",")] if checks else None
     scanner = Scanner(check_ids=check_ids)
-    results = scanner.scan_all(targets)
+
+    if with_audit:
+        results, audit_record = scanner.scan_with_audit(targets)
+        console.print(f"[dim]Audit record: {audit_record['hash']} (chain: {'OK' if audit_record['prev_hash'] else 'genesis'})[/dim]")
+    else:
+        results = scanner.scan_all(targets)
 
     reporter = Reporter(fmt=output_format, quiet=quiet)
     output_text = reporter.render(results, targets)
@@ -71,27 +57,172 @@ def scan(target, output_format, checks, output, quiet):
         if not quiet:
             console.print(f"Report saved to {output}", style="green")
     else:
-        if output_format == "terminal":
-            console.print(output_text, markup=False)
-        else:
-            console.print(output_text)
+        console.print(output_text, markup=False) if output_format == "terminal" else console.print(output_text)
 
-    # Exit code = number of FAIL findings
-    fail_count = sum(
-        1 for r in results for f in r.findings if f.severity == "FAIL"
-    )
+    fail_count = sum(1 for r in results for f in r.findings if f.severity == "FAIL")
     sys.exit(min(fail_count, 255))
 
+
+# ═══════════════════════════════════════════════════════════════════
+# baseline
+# ═══════════════════════════════════════════════════════════════════
+
+@main.command()
+@click.option("--target", "-t", help="Path to MCP config.")
+@click.option("--show", "show_baseline", is_flag=True, help="Show current baseline.")
+def baseline(target, show_baseline):
+    """Snapshot current findings as baseline. Later scans show drift."""
+
+    targets = _resolve_targets(target)
+    if not targets:
+        console.print("No targets found. Use --target to specify a config file.", style="red")
+        sys.exit(1)
+
+    scanner = Scanner()
+    config_path = targets[0]
+
+    if show_baseline:
+        from mcp_guard.baseline import load_baseline
+        bl = load_baseline(config_path)
+        if not bl:
+            console.print("No baseline found. Run 'mcp-lint baseline' first.", style="yellow")
+            sys.exit(1)
+        import json
+        console.print(json.dumps(bl, indent=2, ensure_ascii=False))
+        return
+
+    result = scanner.baseline(targets)
+    console.print(f"[green]Baseline saved: {result['lock_path']}[/green]")
+    console.print(f"  Servers: {result['servers']}")
+    console.print(f"  Run 'mcp-lint verify' to check for drift.")
+
+
+# ═══════════════════════════════════════════════════════════════════
+# verify
+# ═══════════════════════════════════════════════════════════════════
+
+@main.command()
+@click.option("--target", "-t", help="Path to MCP config.")
+@click.option("--gate", is_flag=True, help="Exit 1 if new FAILs found (CI mode).")
+def verify(target, gate):
+    """Scan + compare against baseline. Show what changed."""
+
+    targets = _resolve_targets(target)
+    if not targets:
+        console.print("No targets found.", style="red")
+        sys.exit(1)
+
+    scanner = Scanner()
+    report = scanner.verify(targets)
+    delta = report.get("delta", {})
+
+    if delta.get("message"):
+        console.print(f"[yellow]{delta['message']}[/yellow]")
+        sys.exit(0)
+
+    console.print(f"Baseline age: {report.get('baseline_age', '?')}")
+    console.print(f"Drift detected: {'YES' if delta.get('drift') else 'NO'}")
+
+    if delta.get("new_fails"):
+        console.print(f"\n[red]NEW FAILS ({len(delta['new_fails'])}):[/red]")
+        for item in delta["new_fails"]:
+            console.print(f"  ✗ {item}")
+
+    if delta.get("fixed"):
+        console.print(f"\n[green]FIXED ({len(delta['fixed'])}):[/green]")
+        for item in delta["fixed"]:
+            console.print(f"  ✓ {item}")
+
+    if not delta.get("new_fails") and not delta.get("fixed"):
+        console.print("\n[green]No changes since baseline.[/green]")
+
+    if gate and delta.get("new_fails"):
+        console.print("\n[red]Gate: BLOCKED — new FAIL findings introduced.[/red]")
+        sys.exit(1)
+    elif gate:
+        console.print("\n[green]Gate: PASSED.[/green]")
+
+
+# ═══════════════════════════════════════════════════════════════════
+# autofix
+# ═══════════════════════════════════════════════════════════════════
+
+@main.command()
+@click.option("--target", "-t", help="Path to MCP config.")
+@click.option("--apply", is_flag=True, help="Apply high-confidence fixes (default: preview only).")
+def autofix(target, apply):
+    """Suggest (or apply) automatic fixes for detected issues."""
+
+    targets = _resolve_targets(target)
+    if not targets:
+        console.print("No targets found.", style="red")
+        sys.exit(1)
+
+    scanner = Scanner()
+    result = scanner.autofix(targets, apply=apply)
+
+    console.print(f"Suggestions: {result['suggestions']} total")
+    console.print(f"Auto-applicable (confidence >= 0.9): {result['auto_applicable']}")
+    console.print(f"Applied: {'YES' if result['applied'] else 'NO (preview mode)'}")
+
+    if result["details"]:
+        console.print()
+        for d in result["details"]:
+            tag = "[AUTO]" if d["confidence"] >= 0.9 else "[MANUAL]"
+            console.print(f"  {tag} {d['fix_id']}")
+            console.print(f"       → {d['finding']}")
+
+
+# ═══════════════════════════════════════════════════════════════════
+# audit
+# ═══════════════════════════════════════════════════════════════════
+
+@main.command()
+@click.option("--verify", "verify_chain", is_flag=True, help="Verify hash chain integrity.")
+@click.option("--limit", "-n", default=10, help="Number of records to show.")
+def audit(verify_chain, limit):
+    """Show audit trail or verify chain integrity."""
+
+    from mcp_guard.audit import read_audit_log, verify_chain as _verify
+
+    if verify_chain:
+        valid, msg = _verify()
+        if valid:
+            console.print(f"[green]Audit chain: {msg}[/green]")
+        else:
+            console.print(f"[red]Audit chain: {msg}[/red]")
+            sys.exit(1)
+        return
+
+    records = read_audit_log(limit)
+    if not records:
+        console.print("No audit records found. Run 'mcp-lint scan --audit' first.", style="yellow")
+        return
+
+    for r in records:
+        icon = "✗" if r["fails"] > 0 else "✓"
+        console.print(
+            f"  {icon} {r['timestamp'][:19]}  "
+            f"fail={r['fails']} warn={r['warns']} pass={r['passes']}  "
+            f"hash={r['hash']}  op={r.get('operator', '?')}"
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════
+# list-checks
+# ═══════════════════════════════════════════════════════════════════
 
 @main.command()
 def list_checks():
     """List all available security checks."""
-    from mcp_guard.scanner import Scanner
-
     scanner = Scanner()
     for check in scanner.checks:
-        print(f"  {check.id:12s} {check.name:40s} [{check.owasp}]")
+        print(f"  {check.id:6s}  {check.name:45s}  [{check.owasp}]")
 
+
+# ═══════════════════════════════════════════════════════════════════
+# helpers
+# ═══════════════════════════════════════════════════════════════════
 
 def _resolve_targets(target: str | None) -> list[Path]:
     if target:
@@ -100,7 +231,7 @@ def _resolve_targets(target: str | None) -> list[Path]:
             return [p]
         if p.is_dir():
             return sorted(p.glob("**/mcp*.json")) + sorted(p.glob("**/claude_desktop_config.json"))
-        console.print(f"[yellow]Warning: {target} not found, falling back to auto-discovery[/yellow]")
+        console.print(f"Warning: {target} not found, falling back to auto-discovery", style="yellow")
 
     from mcp_guard.discovery import discover_configs
     return discover_configs()

@@ -75,15 +75,11 @@ class Reporter:
             lines.append(f"Total: {total} findings — {fails} FAIL, {warns} WARN, {passes} PASS")
 
             if fails > 0:
-                lines.append(
-                    f"\n[red]Action required: {fails} critical issue(s) need remediation.[/red]"
-                )
+                lines.append(f"\n*** Action required: {fails} critical issue(s) need remediation. ***")
             elif warns > 0:
-                lines.append(
-                    f"\n[yellow]Review recommended: {warns} non-critical finding(s).[/yellow]"
-                )
+                lines.append(f"\nReview recommended: {warns} non-critical finding(s).")
             else:
-                lines.append(f"\n[green]All checks passed. No security issues found.[/green]")
+                lines.append(f"\nAll checks passed. No security issues found.")
 
         return "\n".join(lines)
 

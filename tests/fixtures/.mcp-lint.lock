@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "created": "2026-06-30T05:29:48.298023+00:00",
+  "config_hash": "04865554bf32a097e9f331881fa7c1f8b2388c589dfddd4691416670a3ceb147",
+  "findings_hash": "f07a3edb2a502f659e93442a7ceb3b4d75326978a738051f4cb1ef6da6db5789",
+  "server_count": 4,
+  "findings": {
+    "insecure-server": {
+      "MCP01": "WARN",
+      "MCP02": "WARN",
+      "MCP03": "PASS",
+      "MCP04": "PASS",
+      "MCP05": "WARN",
+      "MCP07": "PASS",
+      "MCP09": "PASS"
+    },
+    "poisoned-server": {
+      "MCP01": "PASS",
+      "MCP02": "WARN",
+      "MCP03": "FAIL",
+      "MCP04": "PASS",
+      "MCP05": "PASS",
+      "MCP07": "PASS",
+      "MCP09": "PASS"
+    },
+    "no-auth-http": {
+      "MCP01": "PASS",
+      "MCP02": "WARN",
+      "MCP03": "PASS",
+      "MCP04": "PASS",
+      "MCP05": "PASS",
+      "MCP07": "FAIL",
+      "MCP09": "PASS"
+    },
+    "broad-filesystem": {
+      "MCP01": "PASS",
+      "MCP02": "WARN",
+      "MCP03": "PASS",
+      "MCP04": "PASS",
+      "MCP05": "PASS",
+      "MCP07": "PASS",
+      "MCP09": "PASS"
+    }
+  },
+  "remediated": []
+}
