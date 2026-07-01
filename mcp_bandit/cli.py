@@ -1,4 +1,4 @@
-"""MCP Lint CLI — scan / baseline / autofix / verify / audit."""
+"""mcp-bandit CLI — scan / baseline / autofix / verify / audit."""
 
 import sys
 from pathlib import Path
@@ -60,8 +60,10 @@ def scan(target, output_format, checks, output, quiet, with_audit, rules):
         Path(output).write_text(output_text, encoding="utf-8")
         if not quiet:
             console.print(f"Report saved to {output}", style="green")
+    elif output_format == "terminal":
+        console.print(output_text, markup=False)
     else:
-        console.print(output_text, markup=False) if output_format == "terminal" else console.print(output_text)
+        print(output_text)
 
     fail_count = sum(1 for r in results for f in r.findings if f.severity == "FAIL")
     sys.exit(min(fail_count, 255))
@@ -235,7 +237,9 @@ def _resolve_targets(target: str | None) -> list[Path]:
             return [p]
         if p.is_dir():
             return sorted(p.glob("**/mcp*.json")) + sorted(p.glob("**/claude_desktop_config.json"))
-        console.print(f"Warning: {target} not found, falling back to auto-discovery", style="yellow")
+        console.print(f"[red]Error: {target} not found.[/red]", style="red")
+        console.print("[dim]Specify a valid file or directory path with --target, or omit to auto-discover.[/dim]")
+        sys.exit(1)
 
     from mcp_bandit.discovery import discover_configs
     return discover_configs()

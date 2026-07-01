@@ -87,7 +87,7 @@ FIX_TEMPLATES = [
 # Before: ["--token", "ghp_xxxx"]
 # After:  use env field instead: "env": {"GITHUB_TOKEN": "$GITHUB_TOKEN"}
 """,
-        "confidence": 0.9,
+        "confidence": 0.8,
     },
 ]
 
@@ -115,6 +115,8 @@ def suggest_fixes(findings: list) -> list[dict]:
 
 def apply_autofix(config_path: Path, suggestions: list[dict]) -> Optional[str]:
     """Apply auto-fixable suggestions (confidence >= 0.9). Returns modified config as string."""
+    import re
+
     auto_fixes = [s for s in suggestions if s["auto_applicable"]]
     if not auto_fixes:
         return None
@@ -126,9 +128,45 @@ def apply_autofix(config_path: Path, suggestions: list[dict]) -> Optional[str]:
         if fix_id == "fix-bind-localhost":
             content = content.replace("0.0.0.0", "127.0.0.1")
         elif fix_id == "fix-npx-no-y":
-            content = content.replace('"-y", ', "").replace(', "-y"', "").replace('"-y"', "")
+            content = re.sub(r'"-y"\s*,\s*', "", content)
+            content = re.sub(r',\s*"-y"', "", content)
+            content = content.replace('"-y"', "")
         elif fix_id == "fix-secret-in-args":
-            # Complex: needs user to create env section. Template-only.
-            pass
+            # Replace hardcoded secret-looking values in args with env references
+            content = re.sub(
+                r'(sk-[a-zA-Z0-9]{20,})',
+                r'${API_KEY}',
+                content,
+            )
+            content = re.sub(
+                r'(ghp_[a-zA-Z0-9]{30,})',
+                r'${GITHUB_TOKEN}',
+                content,
+            )
+        elif fix_id == "fix-missing-auth-header":
+            content = _inject_auth_headers(content)
+        elif fix_id == "fix-secret-to-env-var":
+            content = _redact_env_values(content)
 
+    return content
+
+
+def _inject_auth_headers(content: str) -> str:
+    """Add Authorization header template to HTTP transport configs missing auth."""
+    if '"headers"' not in content:
+        content = content.replace(
+            '"type": "streamable-http"',
+            '"type": "streamable-http",\n    "headers": {"Authorization": "Bearer ${MCP_TOKEN}"}',
+        )
+    return content
+
+
+def _redact_env_values(content: str) -> str:
+    """Replace plaintext env values with $VAR references."""
+    import re
+    env_block = re.search(r'"env"\s*:\s*\{([^}]+)\}', content)
+    if env_block:
+        original = env_block.group(0)
+        replaced = re.sub(r'"([A-Z_]+)"\s*:\s*"[^$][^"]{8,}"', r'"\1": "$\1"', original)
+        content = content.replace(original, replaced)
     return content

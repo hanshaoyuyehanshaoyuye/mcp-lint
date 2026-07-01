@@ -9,14 +9,12 @@ Every scan produces one record with:
 
 import hashlib
 import json
-import os
-import time
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional
 
 
-AUDIT_FILE = os.path.expanduser("~/.mcp-bandit-audit.jsonl")
+AUDIT_FILE = Path.home() / ".mcp-bandit-audit.jsonl"
 
 
 def _sha256(data: str) -> str:
@@ -33,10 +31,10 @@ def write_audit_record(
     findings_json: str = "",
 ) -> dict:
     """Append one audit record. Returns the record dict."""
-    os.makedirs(os.path.dirname(AUDIT_FILE), exist_ok=True)
+    AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     prev_hash = ""
-    if os.path.isfile(AUDIT_FILE):
+    if AUDIT_FILE.is_file():
         with open(AUDIT_FILE) as f:
             for line in f:
                 line = line.strip()
@@ -56,7 +54,7 @@ def write_audit_record(
     }
     record["hash"] = _sha256(json.dumps(record, sort_keys=True))
 
-    with open(AUDIT_FILE, "a", encoding="utf-8") as f:
+    with open(str(AUDIT_FILE), "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
     return record
@@ -64,10 +62,10 @@ def write_audit_record(
 
 def read_audit_log(limit: int = 10) -> list[dict]:
     """Read last N audit records."""
-    if not os.path.isfile(AUDIT_FILE):
+    if not AUDIT_FILE.is_file():
         return []
     records = []
-    with open(AUDIT_FILE, encoding="utf-8") as f:
+    with open(str(AUDIT_FILE), encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:

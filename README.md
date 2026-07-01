@@ -3,7 +3,8 @@
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://python.org) [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE) [![OWASP](https://img.shields.io/badge/OWASP-MCP%20Top%2010-red)](https://owasp.org/www-project-mcp-top-10/)
 
 <p align="center">
-  <b><i>你的 mcp.json 有 30 行。其中 10 行可能是漏洞。</i></b><br>
+  <b><i>MCP 生态狂奔三年，安全却还在裸泳。</i></b><br>
+  <b><i>工具投毒、上下文注入、密钥泄露——不是会不会出事，是多久出事。</i></b>
 </p>
 
 <pre align="center">
@@ -11,8 +12,8 @@ pip install mcp-bandit && mcp-bandit scan
 </pre>
 
 <p align="center">
-5 秒 · 10 项检查 · 零 API 依赖<br>
-<strong>小小插件，为你的电脑保驾护航。</strong>
+5 秒 · 10 项检查 · A-F 六级评分 · CVSS 定量定级<br>
+<strong>MCP 的 bandit 来了。开源，离线，一行命令。</strong>
 </p>
 
 ---
@@ -53,7 +54,7 @@ mcp-bandit scan
 That's it. It auto-discovers MCP configs across Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, Gemini CLI, and Codex CLI.
 
 ```
-mcp-bandit v0.2.0 — MCP Security Linter
+mcp-bandit v0.3.1 — MCP Security Linter
 ═══════════════════════════════════════════════
 Targets: ~/.claude.json
 Servers: 2 | PASS: 13 | WARN: 1 | FAIL: 0

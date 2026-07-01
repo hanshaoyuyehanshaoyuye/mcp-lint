@@ -1,7 +1,7 @@
 """Base class for all security checks."""
 
 import json
-import os
+from pathlib import Path
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
@@ -9,7 +9,7 @@ import yaml
 
 from mcp_bandit.types import ScanTarget, Finding
 
-RULES_DIR = os.path.join(os.path.dirname(__file__), "..", "rules")
+RULES_DIR = str(Path(__file__).parent.parent / "rules")
 
 
 class SecurityCheck(ABC):
@@ -42,8 +42,8 @@ class SecurityCheck(ABC):
         """Load YAML rules from mcp_bandit/rules/<rule_file>. Returns {} if not found."""
         if not self.rule_file:
             return {}
-        path = os.path.join(self._rules_dir, self.rule_file)
-        if not os.path.isfile(path):
+        path = Path(self._rules_dir) / self.rule_file
+        if not path.is_file():
             return {}
         with open(path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}

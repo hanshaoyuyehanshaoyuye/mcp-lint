@@ -4,6 +4,8 @@ import json
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from mcp_bandit import __version__
+
 if TYPE_CHECKING:
     from mcp_bandit.scanner import ServerResult, Finding
 
@@ -33,7 +35,7 @@ class Reporter:
 
         lines = []
         lines.append("")
-        lines.append("mcp-bandit v0.3.0 — MCP Security Linter")
+        lines.append(f"mcp-bandit v{__version__} — MCP Security Linter")
         lines.append("=" * 56)
 
         target_str = ", ".join(str(t) for t in targets[:3])
@@ -45,7 +47,7 @@ class Reporter:
 
         for result in results:
             g = result.grade
-            grade_bar = _grade_bar(g)
+            grade_bar = grade_bar_str(g)
             lines.append(f"\n  [{g}] {result.server_name}  {grade_bar}")
             for f in result.findings:
                 if f.severity == "PASS" and self._quiet:
@@ -72,16 +74,10 @@ class Reporter:
 
         return "\n".join(lines)
 
-
-def _grade_bar(grade: str) -> str:
-    bars = {"A": "[AAAAA]", "B": "[BBBB-]", "C": "[CCC--]",
-            "D": "[DD---]", "E": "[E----]", "F": "[F----]"}
-    return bars.get(grade, "[?????]")
-
     def _render_json(self, results: list["ServerResult"]) -> str:
         output = {
             "tool": "mcp-bandit",
-            "version": "0.3.0",
+            "version": __version__,
             "servers": [
                 {
                     "name": r.server_name,
@@ -137,7 +133,7 @@ def _grade_bar(grade: str) -> str:
                     "tool": {
                         "driver": {
                             "name": "mcp-bandit",
-                            "version": "0.1.0",
+                            "version": __version__,
                             "rules": [
                                 {"id": f.check_id, "shortDescription": {"text": f.title}}
                                 for f in r.findings
@@ -152,3 +148,9 @@ def _grade_bar(grade: str) -> str:
             "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
             "runs": runs,
         }, indent=2)
+
+
+def grade_bar_str(grade: str) -> str:
+    bars = {"A": "[AAAAA]", "B": "[BBBB-]", "C": "[CCC--]",
+            "D": "[DD---]", "E": "[E----]", "F": "[F----]"}
+    return bars.get(grade, "[?????]")
