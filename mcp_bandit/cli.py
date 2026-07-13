@@ -32,7 +32,8 @@ def main():
 @click.option("--output", "-o", help="Write report to file.")
 @click.option("--quiet", "-q", is_flag=True, help="Only show FAIL/WARN, no summary.")
 @click.option("--audit", "with_audit", is_flag=True, help="Write tamper-evident audit trail record.")
-def scan(target, output_format, checks, output, quiet, with_audit, rules):
+@click.option("--tiered", is_flag=True, help="Use 3-tier pipeline (Reader→Analyzer→Writer) with structural isolation.")
+def scan(target, output_format, checks, output, quiet, with_audit, rules, tiered):
     """Scan MCP configs for security risks."""
 
     targets = _resolve_targets(target)
@@ -45,6 +46,24 @@ def scan(target, output_format, checks, output, quiet, with_audit, rules):
     if rules:
         from mcp_bandit.checks.base import SecurityCheck
         SecurityCheck.set_rules_dir(rules)
+
+    if tiered:
+        # Three-tier pipeline (Reader → Analyzer → Writer)
+        from mcp_bandit.tiers import TieredPipeline
+        pipeline = TieredPipeline(check_ids=check_ids, fmt=output_format, quiet=quiet)
+        if with_audit:
+            results, audit_record = pipeline.scan_with_audit(targets)
+            console.print(f"[dim]Audit record: {audit_record['hash']} (chain: {'OK' if audit_record['prev_hash'] else 'genesis'})[/dim]")
+        else:
+            results, report_text = pipeline.scan(targets, output_path=output)
+            if not output:
+                if output_format == "terminal":
+                    console.print(report_text, markup=False)
+                else:
+                    print(report_text)
+        fail_count = sum(1 for r in results for f in r.findings if f.severity == "FAIL")
+        sys.exit(min(fail_count, 255))
+
     scanner = Scanner(check_ids=check_ids)
 
     if with_audit:
