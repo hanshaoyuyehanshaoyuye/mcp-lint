@@ -32,8 +32,10 @@ def main():
 @click.option("--output", "-o", help="Write report to file.")
 @click.option("--quiet", "-q", is_flag=True, help="Only show FAIL/WARN, no summary.")
 @click.option("--audit", "with_audit", is_flag=True, help="Write tamper-evident audit trail record.")
-@click.option("--tiered", is_flag=True, help="Use 3-tier pipeline (Reader→Analyzer→Writer) with structural isolation.")
-def scan(target, output_format, checks, output, quiet, with_audit, rules, tiered):
+@click.option("--tiered", is_flag=True, help="Use 3-tier pipeline.")
+@click.option("--workflow", "-w", type=click.Choice(["direct", "prefect"]), default="direct",
+              help="Orchestration engine: direct (default) or prefect (policy-driven).")
+def scan(target, output_format, checks, output, quiet, with_audit, rules, tiered, workflow):
     """Scan MCP configs for security risks."""
 
     targets = _resolve_targets(target)
@@ -63,6 +65,18 @@ def scan(target, output_format, checks, output, quiet, with_audit, rules, tiered
                     print(report_text)
         fail_count = sum(1 for r in results for f in r.findings if f.severity == "FAIL")
         sys.exit(min(fail_count, 255))
+
+    if workflow == "prefect":
+        from mcp_bandit.prefect_flow import run_scan_flow, run_audit_flow, is_prefect_available
+        if not is_prefect_available():
+            console.print("[yellow]Prefect 未安装。pip install prefect 后重试。改用 direct 模式...[/yellow]")
+        else:
+            if with_audit:
+                result = run_audit_flow(targets)
+                console.print(f"[dim]Audit: {result['audit_hash']} fails={result['fails']}[/dim]")
+            else:
+                run_scan_flow(targets, check_ids, output)
+            return
 
     scanner = Scanner(check_ids=check_ids)
 
@@ -236,6 +250,25 @@ def audit(verify_chain, limit):
 # ═══════════════════════════════════════════════════════════════════
 # list-checks
 # ═══════════════════════════════════════════════════════════════════
+
+@main.command("prefect")
+@click.option("--ui", "start_ui", is_flag=True, help="Open Prefect UI dashboard.")
+@click.option("--port", default=4200, help="Prefect server port.")
+def prefect_server(start_ui, port):
+    """Start Prefect server + optional UI dashboard."""
+    from mcp_bandit.prefect_flow import is_prefect_available
+    if not is_prefect_available():
+        console.print("[red]Prefect 未安装。pip install prefect[/red]")
+        sys.exit(1)
+
+    import subprocess
+    console.print(f"[green]启动 Prefect Server (port {port})...[/green]")
+    if start_ui:
+        subprocess.run(["prefect", "server", "start", "--port", str(port)], check=False)
+    else:
+        subprocess.run(["prefect", "server", "start", "--port", str(port)], check=False)
+    console.print("[dim]Prefect dashboard: http://127.0.0.1:4200[/dim]")
+
 
 @main.command()
 def list_checks():
