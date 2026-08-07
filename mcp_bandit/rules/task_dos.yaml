@@ -1,0 +1,45 @@
+# MCP13: Task Lifecycle DoS (NEW — MCP 2026-07-28 stateless spec)
+# Detects misconfigurations enabling resource exhaustion via long-running tasks.
+
+patterns:
+  # Missing max_tasks limit
+  - regex: "\"(?:tasks|queue)\"\\s*:\\s*\\{[^}]*\"maxTasks\"\\s*:\\s*(?:null|0|-1)"
+    label: "Unbounded task queue (maxTasks=0/-1/null)"
+    cvss: 7.0
+    detail: "No limit on concurrent/pending tasks. Attackers can flood the queue. Set reasonable maxTasks (e.g., 100)."
+
+  # No task timeout
+  - regex: "\"taskTimeout\"\\s*:\\s*(?:null|0|false)"
+    label: "No task timeout configured"
+    cvss: 7.0
+    detail: "Tasks can run indefinitely without timeout. Set taskTimeout to a reasonable value (e.g., 300s)."
+
+  # progress total mismatch pattern
+  - regex: "\"progress\"\\s*:\\s*(?:0|-?\\d+)\\s*,\\s*\"total\"\\s*:\\s*0"
+    label: "Progress with total=0 (div-by-zero risk)"
+    cvss: 5.0
+    detail: "Progress total set to 0 — clients that divide progress/total will crash. Validate total > 0."
+
+  # Cancellable task without rate limit
+  - regex: "\"cancellable\"\\s*:\\s*true.*\"(?:rateLimit|maxCancels)\"\\s*:\\s*(?:null|0)"
+    label: "Cancellable tasks without rate limit"
+    cvss: 8.0
+    detail: "Cancellable tasks with no rate limit enable cancel+resubmit infinite loops. Add maxCancels per time window."
+
+  # Async event loop without max concurrent
+  - regex: "\"async\"\\s*:\\s*true.*\"(?:maxConcurrent|concurrency)\"\\s*:\\s*(?:null|0|-1)"
+    label: "Async execution without concurrency limit"
+    cvss: 8.0
+    detail: "Unbounded async execution enables event loop exhaustion. Set maxConcurrent (e.g., 10)."
+
+  # Infinite progress loop (detect missing progress ceiling)
+  - regex: "\"progressToken\".*\"total\"\\s*:\\s*(?:null|0)"
+    label: "Progress token with null/zero total"
+    cvss: 6.0
+    detail: "Progress tracking without defined total enables infinite progress loops. Require explicit total > 0."
+
+  # Missing operation timeout on async ops
+  - regex: "\"(?:longRunning|async|background)\"\\s*:\\s*true.*\"(?:timeout|deadline)\"\\s*:\\s*(?:null|0)"
+    label: "Long-running operation without timeout"
+    cvss: 7.0
+    detail: "Async/long-running operations without timeout can stall indefinitely. Set per-operation timeout."

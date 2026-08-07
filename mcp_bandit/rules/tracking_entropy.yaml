@@ -1,0 +1,39 @@
+# MCP11: Tracking ID Entropy (NEW — MCP 2026-07-28 stateless spec)
+# Detects predictable/weak tracking identifiers enabling session hijacking.
+
+patterns:
+  # UUID v1 (time-based, predictable)
+  - regex: "[0-9a-f]{8}-[0-9a-f]{4}-1[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}"
+    label: "UUID v1 (time-based, predictable)"
+    cvss: 6.0
+    detail: "UUID v1 encodes MAC address and timestamp — an attacker on the same subnet can predict future IDs."
+
+  # Sequential / short integer IDs
+  - regex: "\"requestId\"\\s*:\\s*\"?\\d{1,6}\"?"
+    label: "Short numeric requestId"
+    cvss: 7.5
+    detail: "Sequential or short numeric IDs are trivially guessable. Use crypto-random 128-bit+ values."
+
+  # progressToken < 16 chars
+  - regex: "\"progressToken\"\\s*:\\s*\"[^\"]{1,15}\""
+    label: "Short progressToken (<16 chars)"
+    cvss: 7.0
+    detail: "Short progress tokens are susceptible to brute-force. Minimum 128-bit entropy (32 hex chars / 22 base64 chars)."
+
+  # Timestamp-based IDs
+  - regex: "\"(?:requestId|progressToken|sessionId)\"\\s*:\\s*\"\\d{10,13}\""
+    label: "Timestamp-based tracking ID"
+    cvss: 8.0
+    detail: "Pure-timestamp tracking IDs are predictable. Combine with random component."
+
+  # Reused progressToken pattern
+  - regex: "\"progressToken\"\\s*:\\s*\"(\\w+)\".*\"progressToken\"\\s*:\\s*\"\\1\""
+    label: "Duplicate progressToken across requests"
+    cvss: 8.5
+    detail: "Same progressToken reused — attacker can replay progress notifications across requests."
+
+  # Missing sessionId immutability
+  - regex: "\"sessionId\"\\s*:\\s*\"[^\"]*\""
+    label: "sessionId present — verify immutability"
+    cvss: 4.0
+    detail: "Stateless spec requires sessionId to be immutable. Ensure it is set once and never rotated by clients."

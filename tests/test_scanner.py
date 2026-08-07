@@ -79,7 +79,7 @@ def test_scan_vulnerable_config():
 
 def test_scanner_all_checks_registered():
     scanner = Scanner()
-    assert scanner.check_count == 10  # OWASP MCP Top 10: complete coverage
+    assert scanner.check_count == 13  # 10 OWASP MCP Top 10 + 3 MCP 2026-07-28 stateless spec
 
 
 if __name__ == "__main__":

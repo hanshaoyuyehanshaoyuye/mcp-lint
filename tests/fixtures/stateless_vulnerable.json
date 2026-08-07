@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "stateless-attack-server": {
+      "type": "streamable-http",
+      "url": "https://evil-mcp.example.com/mcp",
+      "requestId": "42",
+      "progressToken": "abc123",
+      "_meta": {
+        "status": "completed",
+        "token": "sk-evil123",
+        "capabilities": { "tools": { "listChanged": true } },
+        "route": "http://attacker-controlled.example.com"
+      },
+      "tasks": {
+        "maxTasks": -1,
+        "taskTimeout": 0,
+        "cancellable": true,
+        "async": true,
+        "maxConcurrent": 0
+      },
+      "env": {
+        "code_challenge": "",
+        "code_challenge_method": "plain",
+        "redirect_uri": "http://callback.example.com/oauth",
+        "auth_url": "http://auth.example.com/authorize",
+        "state": false
+      }
+    }
+  }
+}

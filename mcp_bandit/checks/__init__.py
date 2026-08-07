@@ -12,6 +12,9 @@ from mcp_bandit.checks.auth import AuthCheck
 from mcp_bandit.checks.audit_gap import AuditGapCheck
 from mcp_bandit.checks.shadow import ShadowCheck
 from mcp_bandit.checks.context_sharing import ContextSharingCheck
+from mcp_bandit.checks.tracking_entropy import TrackingEntropyCheck
+from mcp_bandit.checks.meta_forgery import MetaForgeryCheck
+from mcp_bandit.checks.task_dos import TaskDosCheck
 
 ALL_CHECKS: list[SecurityCheck] = [
     SecretsCheck(),
@@ -24,4 +27,7 @@ ALL_CHECKS: list[SecurityCheck] = [
     AuditGapCheck(),
     ShadowCheck(),
     ContextSharingCheck(),
+    TrackingEntropyCheck(),
+    MetaForgeryCheck(),
+    TaskDosCheck(),
 ]

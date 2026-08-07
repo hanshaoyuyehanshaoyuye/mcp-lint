@@ -1,0 +1,39 @@
+# MCP12: _meta Field Forgery (NEW — MCP 2026-07-28 stateless spec)
+# Detects spoofable metadata that can forge server identity or override task state.
+
+patterns:
+  # _meta without integrity protection on network transports
+  - regex: "\"_meta\"\\s*:"
+    label: "_meta field present on network transport"
+    cvss: 5.0
+    detail: "_meta fields propagate through all protocol messages. On network transports without TLS mutual-auth, _meta can be forged. Require server-side _meta signature verification."
+
+  # Fake capability declaration
+  - regex: "\"capabilities\"\\s*:\\s*\\{[^}]*\"tools\"\\s*:\\s*\\{[^}]*\"listChanged\"\\s*:\\s*true"
+    label: "tools/listChanged declared in _meta capabilities"
+    cvss: 6.0
+    detail: "Server declaring tools/listChanged capability — verify this matches actual tool list behavior. False capabilities can mislead clients."
+
+  # _meta overriding task status
+  - regex: "\"_meta\".*\"(?:status|state)\"\\s*:\\s*\"(?:completed|failed|cancelled)\""
+    label: "_meta attempting to override task status"
+    cvss: 9.0
+    detail: "_meta fields should NEVER contain task lifecycle state. Task status must be set via A2A Task state machine only."
+
+  # Unexpected _meta keys
+  - regex: "\"_meta\"\\s*:\\s*\\{[^}]*\"(?:auth|token|secret|key|password)\""
+    label: "Sensitive data in _meta"
+    cvss: 9.5
+    detail: "_meta must not contain authentication tokens, secrets, or credentials. These belong in HTTP Authorization headers."
+
+  # Large _meta payload
+  - regex: "\"_meta\"\\s*:\\s*\\{[^}]{500,}\\}"
+    label: "Oversized _meta payload (>500 chars)"
+    cvss: 4.0
+    detail: "Oversized _meta payloads can be used for data exfiltration or DoS. Cap _meta size at 4KB per spec recommendation."
+
+  # Routing metadata injection
+  - regex: "\"_meta\".*\"(?:route|forward|redirect|proxy)\"\\s*:"
+    label: "Routing metadata in _meta"
+    cvss: 7.0
+    detail: "_meta containing routing directives — attacker can redirect traffic. Routing belongs in HTTP headers, not _meta."

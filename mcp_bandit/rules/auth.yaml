@@ -14,6 +14,36 @@ auth_indicators:
   - secret
 
 network_transports:
-  - sse
   - streamable-http
   - streamable_http
+
+deprecated_transports:
+  - sse
+
+# MCP 2026-07-28: OAuth 2.1 PKCE requirements
+pkce_required:
+  - code_challenge
+  - code_challenge_method
+  - S256
+
+pkce_weak_patterns:
+  - regex: "\"code_challenge_method\"\\s*:\\s*\"plain\""
+    label: "PKCE code_challenge_method=plain (must be S256)"
+    cvss: 7.5
+    detail: "OAuth 2.1 requires S256 as code_challenge_method. 'plain' is vulnerable to authorization code interception."
+  - regex: "(?:oauth|bearer|token|auth).*(?!.*code_challenge)"
+    label: "OAuth config without PKCE code_challenge"
+    cvss: 8.0
+    detail: "OAuth 2.1 mandates PKCE. Missing code_challenge enables authorization code injection attacks."
+  - regex: "\"redirect_uri\"\\s*:\\s*\"http://"
+    label: "OAuth redirect_uri using HTTP (must be HTTPS)"
+    cvss: 8.5
+    detail: "Authorization code delivered over plain HTTP is interceptable. Redirect URIs must use HTTPS."
+  - regex: "(?:authorization_server|auth_server|auth_url)\"\\s*:\\s*\"http://"
+    label: "Authorization server URL using HTTP"
+    cvss: 9.0
+    detail: "Authorization server endpoint over plain HTTP — tokens and codes are visible to network observers."
+  - regex: "\"state\"\\s*:\\s*(?:null|false|\"\")"
+    label: "Missing or disabled OAuth state parameter (CSRF)"
+    cvss: 7.0
+    detail: "state parameter prevents CSRF attacks on OAuth flows. Must be random and validated per-request."
